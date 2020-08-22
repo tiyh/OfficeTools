@@ -23,18 +23,28 @@ def checkUrlAccess(mdUrl,workspace,oneFile):
         #todo
         i=1
     else :
-        path = pathlib.Path(workspace+"/"+url)
+        path = pathlib.Path(oneFile+"/"+url)
         #print(workspace+"/"+url+" exist?:",path.exists())
         if not path.exists():
             tryFixUrl(mdUrl,workspace,oneFile)
 
 def tryFixUrl(mdUrl,workspace,oneFile):
-    print("tryFixUrl:"+ mdUrl)
-    start = mdUrl.rindex('/')
-    name = mdUrl[start+1:]
+    name = mdUrl
+    try:
+        start = mdUrl.rindex('/')
+        name = mdUrl[start+1:]
+    except:
+        print("exception: "+name)
+    pos="."
+    try:
+        start = oneFile.rindex('/')
+        pos = oneFile[:start]
+    except:
+        print("exception: "+oneFile)
     mdFilelist = glob.glob(workspace+r"/**/"+name, recursive=True)
     if mdFilelist and len(mdFilelist)==1:
-        updateFile(oneFile, mdUrl, mdFilelist[0])
+        print("tryFixUrl: file:"+ oneFile+",origin:"+mdUrl+",new:"+os.path.relpath(mdFilelist[0],pos))
+        updateFile(oneFile, mdUrl, os.path.relpath(mdFilelist[0],pos))
     else:
         print("warning: fix "+name+" failed")
 
@@ -51,12 +61,12 @@ def checkMd(MD_PATH):
     for oneFile in mdFilelist:
         mdFile = open(oneFile)
         for line in mdFile.readlines():
-            p1 = re.compile(r']\((.*?)\)', re.S)
-            #p1 = re.compile(r'!\[(.*?)\]\((.*?)\)', re.S)
+            #p1 = re.compile(r']\((.*?)\)', re.S)
+            p1 = re.compile(r'!\[(.*?)\]\((.*?)\)', re.S)
             matchObjs = re.findall(p1, line)
             if matchObjs:
                 for oneMatch in matchObjs:
-                    checkUrlAccess(oneMatch,MD_PATH,oneFile)
+                    checkUrlAccess(oneMatch[1],MD_PATH,oneFile)
         mdFile.close()
 
 def main():
