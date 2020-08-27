@@ -4,6 +4,7 @@ import re
 import os
 import argparse
 import pathlib
+from downloader import *
 
 #https://pythonhosted.org/watchdog/
 #包含两个参数
@@ -20,11 +21,17 @@ parser.add_argument('--workspace', metavar='WORKSPACE', type=str, default='.', h
 def checkUrlAccess(mdUrl,workspace,oneFile):
     url = mdUrl.strip()
     if url.startswith("http"):
-        #todo
-        i=1
+        if not canUrlVisit(url,""):
+            print(url+" can not visit")
     else :
-        path = pathlib.Path(oneFile+"/"+url)
-        #print(workspace+"/"+url+" exist?:",path.exists())
+        pos="."
+        try:
+            start = oneFile.rindex('/')
+            pos = oneFile[:start]
+        except:
+            print("exception: "+oneFile)
+        path = pathlib.Path(pos+"/"+url)
+        #print(pos+"/"+url+" exist?:",path.exists())
         if not path.exists():
             tryFixUrl(mdUrl,workspace,oneFile)
 
